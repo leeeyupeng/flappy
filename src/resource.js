@@ -1,20 +1,15 @@
-var s_HelloWorld = "res/HelloWorld.png";
-var s_CloseNormal = "res/CloseNormal.png";
-var s_CloseSelected = "res/CloseSelected.png";
+var res = {
+    shareTexture_png : 'res/assets/share.png',
+    shareTexture_plist : 'res/assets/share.plist',
+    bird : 'res/assets/bird.png'
+}
 
-var g_resources = [
-    //image
-    {src:s_HelloWorld},
-    {src:s_CloseNormal},
-    {src:s_CloseSelected}
-
-    //plist
-
-    //fnt
-
-    //tmx
-
-    //bgm
-
-    //effect
+var g_mainmenu = [
+    {src:res.shareTexture_png},
+    {src:res.shareTexture_plist}
+];
+var g_maingame = [
+    {src:res.shareTexture_png},
+    {src:res.shareTexture_plist},
+    {src:res.bird}
 ];

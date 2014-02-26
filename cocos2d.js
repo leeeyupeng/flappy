@@ -39,7 +39,12 @@
         //SingleEngineFile:'',
         appFiles:[
             'src/resource.js',
-            'src/myApp.js'//add your own files in order here
+            'src/myApp.js',//add your own files in order here
+
+            'src/menu.js',
+            'src/mainScene.js',
+            'src/bird.js',
+            'src/waterpipe.js'
         ]
     };
 

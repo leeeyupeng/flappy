@@ -43,8 +43,9 @@ var cocos2dApp = cc.Application.extend({
         // initialize director
         var director = cc.Director.getInstance();
 
+        cc.EGLView.getInstance().adjustViewPort(true);
+        cc.EGLView.getInstance().setDesignResolutionSize(320,480,cc.RESOLUTION_POLICY.SHOW_ALL);
         cc.EGLView.getInstance().resizeWithBrowserSize(true);
-        cc.EGLView.getInstance().setDesignResolutionSize(800, 450, cc.RESOLUTION_POLICY.SHOW_ALL);
 
         // turn on display FPS
         director.setDisplayStats(this.config['showFPS']);
@@ -53,11 +54,11 @@ var cocos2dApp = cc.Application.extend({
         director.setAnimationInterval(1.0 / this.config['frameRate']);
 
         //load resources
-        cc.LoaderScene.preload(g_resources, function () {
+        cc.LoaderScene.preload(g_mainmenu, function () {
             director.replaceScene(new this.startScene());
         }, this);
 
         return true;
     }
 });
-var myApp = new cocos2dApp(HelloWorldScene);
+var myApp = new cocos2dApp(menuScene);
