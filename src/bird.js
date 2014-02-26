@@ -2,7 +2,6 @@
  * Created by liyupeng on 14-2-26.
  */
 var bird = cc.Sprite.extend({
-    speedx : 50,
     HP:1,
     box:null,
     speedy : 0,
@@ -39,13 +38,19 @@ var bird = cc.Sprite.extend({
 
         this.animateFly.release();
     },
+    jump:function(){
+        this.speedy = 300;
+    },
     PlayFly:function(flag){
         if(flag === true)
             this.runAction(animateFly);
         else
             this.removeAction(animateFly);
+    },
+    update:function (dt) {
+//        alert("update");
+        this.speedy += gravity * dt;
+        this.setPosition(this.getPosition().x , this.getPosition().y + this.speedy * dt);
     }
-
 })
-bird.gravity = 9.8 * 20;
 

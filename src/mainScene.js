@@ -24,15 +24,26 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+var pipetimeinterval = 3;
+var gravity = -9.8 * 100;
+var speedx = 70;
+
 var main = cc.Layer.extend({
     shareTexture : null,
     landSprite : null,
     bird : null,
+    pipes : new Array(),
+    pipeInterval : 1,
+    pipeNext : 2,
+    isStart : false,
+    readyNode : null,
 
     init:function () {
         //////////////////////////////
         // 1. super init first
         this._super();
+
+        this.setMouseEnabled(true);
 
         winSize = cc.Director.getInstance().getWinSize();
 
@@ -58,13 +69,21 @@ var main = cc.Layer.extend({
         this.landSprite.initWithSpriteFrameName("land.png");
         this.landSprite.setAnchorPoint(0,0);
         this.landSprite.setScale(1.1,1);
-        this.addChild(this.landSprite, 0, 0);
-//        sp.setOffsetInPixels
-        this.MoveLand();
+        this.addChild(this.landSprite, 10, 0);
 
-        bird = new Bird();
-        bird.setPosition(cc.p(96,200));
-        this.addChild(bird,1,0);
+        this.schedule(this.MoveLand,24 * 1.1 / speedx);
+
+        this.bird = new bird();
+        this.bird.setPosition(cc.p(96,250));
+        this.addChild(this.bird,1,0);
+
+//        var pipe = waterpipe.create(cc.p(0,200));
+//        pipe.setPosition(cc.p(100,0));
+//        this.addChild(pipe,1,0);
+
+        this.Ready();
+
+//        this.schedule(this.update, 0.1);
 
         return true;
     },
@@ -75,11 +94,28 @@ var main = cc.Layer.extend({
     MoveLand:function(){
         this.landSprite.setPosition(cc.p(0,0));
         this.landSprite.runAction(cc.MoveTo.create(1,cc.p(-24 * 1.1,0)));
-        this.schedule(this.MoveLand,1);
     },
     // a selector callback
     menuCloseCallback:function (sender) {
         cc.Director.getInstance().end();
+    },
+    onMouseDown:function (event) {
+        this._super();
+
+        if(this.isStart === false)
+        {
+            this.StartGame();
+        }
+        if(this.isStart === true)
+        {
+            this.bird.jump();
+        }
+    },
+    onTouchEnded:function (touch, event) {
+        if(this.isStart === false)
+        {
+            this.StartGame();
+        }
     },
     onTouchesBegan:function (touches, event) {
         this.isMouseDown = true;
@@ -96,6 +132,61 @@ var main = cc.Layer.extend({
     },
     onTouchesCancelled:function (touches, event) {
         console.log("onTouchesCancelled");
+    },
+    Ready:function(){
+        cc.SpriteFrameCache.getInstance().addSpriteFrames(res.shareTexture_plist);
+        var sp = new cc.Sprite();
+//        sp.setTextureRect(cc.rect(0,0,320,109));
+        sp.initWithSpriteFrameName("splash.png");
+        sp.setAnchorPoint(0.5,0.5);
+        this.addChild(sp, 8,0);
+        var pos = cc.p(160,240);
+        sp.setPosition(pos);
+
+        this.readyNode = sp;
+    },
+    StartGame : function(){
+        this.isStart = true;
+        this.removeChild(this.readyNode);
+        this.scheduleUpdate();
+        this.bird.scheduleUpdate();
+    },
+    update:function (dt) {
+        this.Pipeupdate(dt);
+    },
+    Pipeupdate:function(dt){
+        this.pipeNext -= dt;
+        if(this.pipeNext <= 0)
+        {
+            this.pipeNext = pipetimeinterval;
+            this.PipeCreate();
+        }
+
+        for(i = 0;i < this.pipes.length;i ++)
+        {
+            this.pipes[i].setPosition(cc.p(this.pipes[i].getPosition().x - this.pipes[i].speed * dt,this.pipes[i].getPosition().y));
+        }
+
+        while(this.pipes.length > 0)
+        {
+            var pipe = this.pipes[0];
+            if(pipe.getPosition().x < -30)
+            {
+                pipe = this.pipes.shift();
+                this.removeChild(pipe);
+            }
+            else
+            {
+                break;
+            }
+        }
+    },
+    PipeCreate : function(){
+        var pipe = waterpipe.create(cc.p(0,Math.random() * 200 + 200));
+        pipe.setPosition(cc.p(350,0));
+        this.addChild(pipe,1,0);
+
+        this.pipes.push(pipe);
     }
 });
 

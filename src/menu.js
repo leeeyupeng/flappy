@@ -59,7 +59,7 @@ var menu = cc.Layer.extend({
         this.landSprite.setScale(1.1,1);
         this.addChild(this.landSprite, 0, 0);
 //        sp.setOffsetInPixels
-        this.MoveLand();
+        this.schedule(this.MoveLand,0.48);
 
 
         var playNormal = new cc.Sprite();
@@ -99,7 +99,6 @@ var menu = cc.Layer.extend({
     MoveLand:function(){
         this.landSprite.setPosition(cc.p(0,0));
         this.landSprite.runAction(cc.MoveTo.create(1,cc.p(-24 * 1.1,0)));
-        this.schedule(this.MoveLand,1);
     },
     // a selector callback
     menuCloseCallback:function (sender) {
