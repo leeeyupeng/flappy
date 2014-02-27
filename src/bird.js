@@ -1,15 +1,27 @@
 /**
  * Created by liyupeng on 14-2-26.
  */
+var speedyjump = 30;
+var speedyFace = 10;
+var speedyFaceAngle = -20;
+var speedyFaceDownStart = 0;
+var speedyFaceDown = -200;
+var speedyFaceDownAngle = 90;
+
 var bird = cc.Sprite.extend({
     HP:1,
     box:null,
     speedy : 0,
 
+    boxRect : null,
+
     animateFly : null,
+    isdied : false,
 
     ctor:function () {
         this._super();
+
+        this.setAnchorPoint(0.5,0.5);
 
         var frame = cc.SpriteFrame.create(res.bird,cc.rect(0,0,34,24));
         this.initWithTexture(frame.getTexture(),frame.getRect());
@@ -25,6 +37,8 @@ var bird = cc.Sprite.extend({
         animFrames.push(frame2);
         animFrames.push(frame3);
 
+        this.boxRect = cc.rect(0,0,34,24);
+
         var animation = cc.Animation.create(animFrames, 0.1);
         var animate = cc.Animate.create(animation);
         animateFly = cc.RepeatForever.create(animate);
@@ -39,7 +53,11 @@ var bird = cc.Sprite.extend({
         this.animateFly.release();
     },
     jump:function(){
-        this.speedy = 300;
+        if(this.isdied === false)
+            this.speedy = 300;
+    },
+    died : function(){
+        this.isdied = true;
     },
     PlayFly:function(flag){
         if(flag === true)
@@ -47,10 +65,55 @@ var bird = cc.Sprite.extend({
         else
             this.removeAction(animateFly);
     },
+    RotationFly:function(){
+        var rot = 0;
+        if(this.speedy > speedyFace)
+        {
+            rot = speedyFaceAngle;
+        }
+        else if(this.speedy > 0)
+        {
+            rot = this.speedy / speedyFace * speedyFaceAngle;
+        }
+        else if(this.speedy > speedyFaceDownStart)
+        {
+            rot = 0;
+        }
+        else if(this.speedy > speedyFaceDown)
+        {
+            rot = (this.speedy - speedyFaceDownStart) / (speedyFaceDown - speedyFaceDownStart) * speedyFaceDownAngle;
+        }
+        else
+        {
+            rot = speedyFaceDownAngle;
+        }
+        this.setRotation(rot);
+    },
     update:function (dt) {
 //        alert("update");
         this.speedy += gravity * dt;
-        this.setPosition(this.getPosition().x , this.getPosition().y + this.speedy * dt);
+        var y = this.getPosition().y + this.speedy * dt;
+        if(y < 112 + 12)
+            y = 112 + 12;
+        this.setPosition(this.getPosition().x , y);
+
+        this.RotationFly();
+
+        winSize = cc.Director.getInstance().getWinSize();
+        if(this.getPosition().y <= 112 + 12)
+        {
+            if(this.isdied)
+                main.GameOver();
+            else
+            {
+                main.Died();
+            }
+        }
+
+        if(this.getPosition().y >= winSize.height)
+        {
+            main.Died();
+        }
     }
 })
 

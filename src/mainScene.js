@@ -28,6 +28,8 @@ var pipetimeinterval = 3;
 var gravity = -9.8 * 100;
 var speedx = 70;
 
+var main = null;
+
 var main = cc.Layer.extend({
     shareTexture : null,
     landSprite : null,
@@ -37,11 +39,16 @@ var main = cc.Layer.extend({
     pipeNext : 2,
     isStart : false,
     readyNode : null,
+    GameNode : null,
+    scoleLabel : null,
+    scole : 0,
 
     init:function () {
         //////////////////////////////
         // 1. super init first
         this._super();
+
+        main = this;
 
         this.setMouseEnabled(true);
 
@@ -75,7 +82,14 @@ var main = cc.Layer.extend({
 
         this.bird = new bird();
         this.bird.setPosition(cc.p(96,250));
-        this.addChild(this.bird,1,0);
+        this.addChild(this.bird,5,0);
+
+        this.GameNode = new cc.Node();
+        this.GameNode.setPosition(cc.p(winSize.width * 0.5,400));
+        this.scoleLabel = new cc.LabelAtlas.create("0",res.numbig,26,38,'0');
+        this.scoleLabel.setAnchorPoint(0.5,0.5);
+        this.GameNode.addChild(this.scoleLabel,0,0);
+        this.GameNode.retain();
 
 //        var pipe = waterpipe.create(cc.p(0,200));
 //        pipe.setPosition(cc.p(100,0));
@@ -94,6 +108,10 @@ var main = cc.Layer.extend({
     MoveLand:function(){
         this.landSprite.setPosition(cc.p(0,0));
         this.landSprite.runAction(cc.MoveTo.create(1,cc.p(-24 * 1.1,0)));
+    },
+    StopLand : function(){
+        this.landSprite.stopAllActions();
+        this.unschedule(this.MoveLand);
     },
     // a selector callback
     menuCloseCallback:function (sender) {
@@ -150,9 +168,14 @@ var main = cc.Layer.extend({
         this.removeChild(this.readyNode);
         this.scheduleUpdate();
         this.bird.scheduleUpdate();
+
+        this.addChild(this.GameNode,10,0);
+
     },
     update:function (dt) {
         this.Pipeupdate(dt);
+
+        this.PassUpdate();
     },
     Pipeupdate:function(dt){
         this.pipeNext -= dt;
@@ -187,6 +210,91 @@ var main = cc.Layer.extend({
         this.addChild(pipe,1,0);
 
         this.pipes.push(pipe);
+    },
+    PassUpdate : function(){
+        var prePipe;
+        var nextPipe;
+        for(i = 0;i < this.pipes.length;i ++)
+        {
+            console.log(this.pipes[i].getPosition().x);
+            if(this.pipes[i].isPass === false)
+            {
+                if(i != 0)
+                    prePipe = this.pipes[i - 1];
+                nextPipe = this.pipes[i];
+                break;
+            }
+        }
+        if(true)
+        {
+            var recta = cc.rect(this.bird.getPosition().x - this.bird.boxRect.width * 0.5
+                ,this.bird.getPosition().y - this.bird.boxRect.height * 0.5
+                ,this.bird.boxRect.width,this.bird.boxRect.height);
+
+            var rectb;
+            //先判断有没有撞到
+            if(prePipe !== undefined)
+            {
+                var pipe = prePipe;
+
+                for(i = 0; i < pipe.boxRect.length;i ++)
+                {
+                    rectb = cc.rect(pipe.getPosition().x - pipe.boxRect[i].width * 0.5
+                        ,pipe.getPosition().y
+                        ,pipe.boxRect[i].width,pipe.boxRect[i].height);
+
+                    if(cc.rectIntersectsRect(recta,rectb))
+                    {
+                        //撞到了
+                        this.Died();
+                        return;
+                    }
+                }
+            }
+
+            if(nextPipe !== undefined)
+            {
+                var pipe = nextPipe;
+
+                for(i = 0; i < pipe.boxRect.length;i ++)
+                {
+                    rectb = cc.rect(pipe.getPosition().x - pipe.boxRect[i].width * 0.5
+                        ,pipe.getPosition().y + pipe.boxRect[i].y
+                        ,pipe.boxRect[i].width,pipe.boxRect[i].height);
+
+                    console.log("rect a :"  + recta.x + "  " + recta.y  +  "  " + recta.width + "  "+ recta.height);
+                    console.log("rect b :"  + rectb.x + "  " + rectb.y  +  "  " + rectb.width + "  "+ rectb.height);
+                    if(cc.rectIntersectsRect(recta,rectb))
+                    {
+                        //撞到了
+                        this.Died();
+                        return;
+                    }
+                }
+            }
+
+            //记分
+            if(nextPipe !== undefined )
+            {
+                if(nextPipe.getPosition().x < this.bird.getPosition().x)
+                {
+                    nextPipe.isPass = true;
+                    this.scole ++;
+                    this.GameNode.getChildren()[0].initWithString(this.scole,res.numbig,26,38,'0');
+                }
+            }
+        }
+    },
+    Died : function(){
+        this.unscheduleUpdate();
+        this.StopLand();
+        this.bird.died();
+    },
+    GameOver : function(){
+        this.bird.unscheduleUpdate();
+        //抖动
+
+        //
     }
 });
 
