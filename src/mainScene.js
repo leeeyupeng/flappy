@@ -24,7 +24,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-var pipetimeinterval = 2;
+var pipetimeinterval = 2.5;
 var gravity = -9.8 * 100;
 var speedx = 70;
 
@@ -114,6 +114,28 @@ var main = cc.Layer.extend({
         scolelabel.setPosition(cc.p(70,-15));
         this.OverNode.addChild(scolelabel,1,0);
 
+        var playNormal = new cc.Sprite();
+        playNormal.initWithSpriteFrameName("replay.png");
+        playNormal.setAnchorPoint(0,0);
+
+        var playPress = new cc.Sprite();
+        playPress.initWithSpriteFrameName("replay.png");
+        playNormal.setAnchorPoint(0,0);
+        playPress.setScale(1.1,1.1);
+
+        var playDisabled = new cc.Sprite();
+        playDisabled.initWithSpriteFrameName("replay.png");
+        playDisabled.setAnchorPoint(0,0);
+
+        var playGame = cc.MenuItemSprite.create(playNormal,playPress,playDisabled,function(){
+            this.onButtonRePlay();
+        }.bind(this)
+        );
+        var menu = cc.Menu.create(playGame);
+        menu.alignItemsVerticallyWithPadding(10);
+        this.OverNode.addChild(menu, 1, 2);
+        menu.setPosition(0, -100);
+
 
 //        var pipe = waterpipe.create(cc.p(0,200));
 //        pipe.setPosition(cc.p(100,0));
@@ -160,6 +182,7 @@ var main = cc.Layer.extend({
     onTouchEnded:function (touch, event) {
         if(this.isStart === false)
         {
+            this.removeChild(this.readyNode);
             this.StartGame();
         }
     },
@@ -195,9 +218,20 @@ var main = cc.Layer.extend({
         this.isStart = true;
         this.scheduleUpdate();
         this.bird.scheduleUpdate();
-
+        this.bird.PlayFly(true);
         this.addChild(this.GameNode,10,0);
+        this.GameNode.getChildren()[0].initWithString(this.scole,res.numbig,26,38,'0');
+        this.PipeRemoveAll();
 
+    },
+    onButtonRePlay:function(){
+        this.isOver = false;
+        this.bird.setPosition(cc.p(96,250));
+        this.bird.isdied = false;
+        this.bird.speedy = 0;
+        this.scole = 0;
+        this.removeChild(this.OverNode);
+        this.StartGame();
     },
     update:function (dt) {
 //        if(this.bird.isdied || this.isOver)
@@ -205,6 +239,13 @@ var main = cc.Layer.extend({
         this.Pipeupdate(dt);
 
         this.PassUpdate();
+    },
+    PipeRemoveAll:function(){
+        while(this.pipes.length > 0)
+        {
+            pipe = this.pipes.shift();
+            this.removeChild(pipe);
+        }
     },
     Pipeupdate:function(dt){
         this.pipeNext -= dt;
@@ -269,9 +310,11 @@ var main = cc.Layer.extend({
                 for(i = 0; i < pipe.boxRect.length;i ++)
                 {
                     rectb = cc.rect(pipe.getPosition().x - pipe.boxRect[i].width * 0.5
-                        ,pipe.getPosition().y
+                        ,pipe.getPosition().y + pipe.boxRect[i].y
                         ,pipe.boxRect[i].width,pipe.boxRect[i].height);
 
+//                    console.log("rect a :"  + recta.x + "  " + recta.y  +  "  " + recta.width + "  "+ recta.height);
+//                    console.log("rect b :"  + rectb.x + "  " + rectb.y  +  "  " + rectb.width + "  "+ rectb.height);
                     if(cc.rectIntersectsRect(recta,rectb))
                     {
                         //撞到了
@@ -327,7 +370,7 @@ var main = cc.Layer.extend({
         //抖动
         this.runAction(cc.Shake.create(0.5,5));
         //
-        this.schedule(this.ShowOverBoard,0.2);
+        this.scheduleOnce(this.ShowOverBoard,0.2);
 
         if(this.scole > this.bestScole){
             this.bestScole = this.scole;
@@ -336,17 +379,11 @@ var main = cc.Layer.extend({
 
     },
     ShowOverBoard:function(){
-        this.removeChild(this.GameNode,false);
+        this.removeChild(this.GameNode);
         this.addChild(this.OverNode,10,0);
 
         this.OverNode.getChildren()[1].initWithString(this.scole,res.numsmall,14,16,'0');
         this.OverNode.getChildren()[2].initWithString(this.bestScole,res.numsmall,14,16,'0');
-    },
-    Replay:function(){
-        this.isOver = false;
-        this.bird.setPosition(cc.p(96,250));
-        this.removeChild(this.OverNode,false);
-        this.StartGame();
     }
 });
 
