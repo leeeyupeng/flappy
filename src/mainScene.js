@@ -88,6 +88,16 @@ var main = cc.Layer.extend({
         this.bird.setPosition(cc.p(96,250));
         this.addChild(this.bird,5,0);
 
+        var sp = new cc.Sprite();
+//        sp.setTextureRect(cc.rect(0,0,320,109));
+        sp.initWithSpriteFrameName("splash.png");
+        sp.setAnchorPoint(0.5,0.5);
+        this.addChild(sp, 8,0);
+        var pos = cc.p(160,240);
+        sp.setPosition(pos);
+        this.readyNode = sp;
+
+
         this.GameNode = new cc.Node();
         this.GameNode.setPosition(cc.p(winSize.width * 0.5,400));
         this.scoleLabel = new cc.LabelAtlas.create("0",res.numbig,26,38,'0');
@@ -141,8 +151,8 @@ var main = cc.Layer.extend({
 //        pipe.setPosition(cc.p(100,0));
 //        this.addChild(pipe,1,0);
 
-        this.cameraShake = cc.Shake.create(1,20);
-        this.cameraShake.retain();
+//        this.cameraShake = Shake.create(1,20);
+//        this.cameraShake.retain();
 
         this.Ready();
 
@@ -203,16 +213,15 @@ var main = cc.Layer.extend({
         console.log("onTouchesCancelled");
     },
     Ready:function(){
-        cc.SpriteFrameCache.getInstance().addSpriteFrames(res.shareTexture_plist);
-        var sp = new cc.Sprite();
-//        sp.setTextureRect(cc.rect(0,0,320,109));
-        sp.initWithSpriteFrameName("splash.png");
-        sp.setAnchorPoint(0.5,0.5);
-        this.addChild(sp, 8,0);
-        var pos = cc.p(160,240);
-        sp.setPosition(pos);
+        this.bird.setRotation(0);
 
-        this.readyNode = sp;
+        this.bird.PlayFly(true);
+
+        this.isStart = false;
+
+        this.addChild(this.readyNode);
+
+
     },
     StartGame : function(){
         this.isStart = true;
@@ -227,11 +236,12 @@ var main = cc.Layer.extend({
     onButtonRePlay:function(){
         this.isOver = false;
         this.bird.setPosition(cc.p(96,250));
+
         this.bird.isdied = false;
         this.bird.speedy = 0;
         this.scole = 0;
         this.removeChild(this.OverNode);
-        this.StartGame();
+        this.Ready();
     },
     update:function (dt) {
 //        if(this.bird.isdied || this.isOver)
@@ -362,13 +372,13 @@ var main = cc.Layer.extend({
         this.StopLand();
         this.bird.died();
 
-        this.runAction(cc.Shake.create(0.2,5));
+        this.runAction(Shake.create(0.2,5));
     },
     GameOver : function(){
         this.isOver = true;
         this.bird.unscheduleUpdate();
         //抖动
-        this.runAction(cc.Shake.create(0.5,5));
+        this.runAction(Shake.create(0.5,5));
         //
         this.scheduleOnce(this.ShowOverBoard,0.2);
 

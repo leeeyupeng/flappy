@@ -1,7 +1,7 @@
 /**
  * Created by liyupeng on 14-2-28.
  */
-cc.Shake = cc.ActionInterval.extend({
+Shake = cc.ActionInterval.extend({
     _initial_x : 0,
     _initial_y : 0,
     _strength_x : 0,
@@ -21,14 +21,14 @@ cc.Shake = cc.ActionInterval.extend({
         this._strength_y = strengthy;
     },
     update:function(dt){
-        console.log("0 :" + this._target.getPosition().x);
+//        console.log("0 :" + this._target.getPosition().x);
         var randx = Math.random() * this._strength_x * 2 - this._strength_x;
 //        randx *= dt;
         var randy = Math.random() * this._strength_y * 2 - this._strength_y;
 //        randy *= dt;
-        console.log("rand : " + randx + "  " + randy);
+//        console.log("rand : " + randx + "  " + randy);
         this._target.setPosition(cc.pAdd(cc.p(this._initial_x,this._initial_y),cc.p(randx,randy)));
-        console.log(this._target.getPosition().x);
+//        console.log(this._target.getPosition().x);
     },
     stop:function(){
 
@@ -37,8 +37,8 @@ cc.Shake = cc.ActionInterval.extend({
     }
 });
 
-cc.Shake.create = function(d,stength){
-    var action = new cc.Shake();
+Shake.create = function(d,stength){
+    var action = new Shake();
     action.initWithDuration(d,stength,stength);
     return action;
 };

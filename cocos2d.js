@@ -41,11 +41,14 @@
             'src/resource.js',
             'src/myApp.js',//add your own files in order here
 
-            'src/menu.js',
-            'src/mainScene.js',
+            'src/share/CCShake.js',
+
+
             'src/bird.js',
             'src/waterpipe.js',
-            'src/share/CCShake.js'
+            'src/menu.js',
+            'src/mainScene.js'
+
         ]
     };
 
