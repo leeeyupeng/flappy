@@ -44,7 +44,8 @@
             'src/menu.js',
             'src/mainScene.js',
             'src/bird.js',
-            'src/waterpipe.js'
+            'src/waterpipe.js',
+            'src/share/CCShake.js'
         ]
     };
 

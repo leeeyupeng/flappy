@@ -24,7 +24,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-var pipetimeinterval = 3;
+var pipetimeinterval = 2;
 var gravity = -9.8 * 100;
 var speedx = 70;
 
@@ -38,10 +38,14 @@ var main = cc.Layer.extend({
     pipeInterval : 1,
     pipeNext : 2,
     isStart : false,
+    isOver : false,
     readyNode : null,
     GameNode : null,
+    OverNode : null,
     scoleLabel : null,
     scole : 0,
+    cameraShake : null,
+    bestScole : 0,
 
     init:function () {
         //////////////////////////////
@@ -91,9 +95,32 @@ var main = cc.Layer.extend({
         this.GameNode.addChild(this.scoleLabel,0,0);
         this.GameNode.retain();
 
+        this.OverNode = new cc.Node();
+        this.OverNode.setPosition(cc.p(winSize.width * 0.5,250));
+        this.OverNode.retain();
+        var board = new cc.Sprite();
+        board.initWithSpriteFrameName("scoreboard.png");
+        board.setAnchorPoint(0.5,0.5);
+        board.setPosition(cc.p(0,0));
+        this.OverNode.addChild(board,0,0);
+
+        var scolelabel = new cc.LabelAtlas.create("0",res.numsmall,14,16,'0');
+        scolelabel.setAnchorPoint(0.5,0.5);
+        scolelabel.setPosition(cc.p(70,25));
+        this.OverNode.addChild(scolelabel,1,0);
+
+        scolelabel = new cc.LabelAtlas.create("0",res.numsmall,14,16,'0');
+        scolelabel.setAnchorPoint(0.5,0.5);
+        scolelabel.setPosition(cc.p(70,-15));
+        this.OverNode.addChild(scolelabel,1,0);
+
+
 //        var pipe = waterpipe.create(cc.p(0,200));
 //        pipe.setPosition(cc.p(100,0));
 //        this.addChild(pipe,1,0);
+
+        this.cameraShake = cc.Shake.create(1,20);
+        this.cameraShake.retain();
 
         this.Ready();
 
@@ -122,6 +149,7 @@ var main = cc.Layer.extend({
 
         if(this.isStart === false)
         {
+            this.removeChild(this.readyNode);
             this.StartGame();
         }
         if(this.isStart === true)
@@ -165,7 +193,6 @@ var main = cc.Layer.extend({
     },
     StartGame : function(){
         this.isStart = true;
-        this.removeChild(this.readyNode);
         this.scheduleUpdate();
         this.bird.scheduleUpdate();
 
@@ -173,6 +200,8 @@ var main = cc.Layer.extend({
 
     },
     update:function (dt) {
+//        if(this.bird.isdied || this.isOver)
+//            return;
         this.Pipeupdate(dt);
 
         this.PassUpdate();
@@ -216,7 +245,7 @@ var main = cc.Layer.extend({
         var nextPipe;
         for(i = 0;i < this.pipes.length;i ++)
         {
-            console.log(this.pipes[i].getPosition().x);
+//            console.log(this.pipes[i].getPosition().x);
             if(this.pipes[i].isPass === false)
             {
                 if(i != 0)
@@ -262,8 +291,8 @@ var main = cc.Layer.extend({
                         ,pipe.getPosition().y + pipe.boxRect[i].y
                         ,pipe.boxRect[i].width,pipe.boxRect[i].height);
 
-                    console.log("rect a :"  + recta.x + "  " + recta.y  +  "  " + recta.width + "  "+ recta.height);
-                    console.log("rect b :"  + rectb.x + "  " + rectb.y  +  "  " + rectb.width + "  "+ rectb.height);
+//                    console.log("rect a :"  + recta.x + "  " + recta.y  +  "  " + recta.width + "  "+ recta.height);
+//                    console.log("rect b :"  + rectb.x + "  " + rectb.y  +  "  " + rectb.width + "  "+ rectb.height);
                     if(cc.rectIntersectsRect(recta,rectb))
                     {
                         //撞到了
@@ -289,12 +318,35 @@ var main = cc.Layer.extend({
         this.unscheduleUpdate();
         this.StopLand();
         this.bird.died();
+
+        this.runAction(cc.Shake.create(0.2,5));
     },
     GameOver : function(){
+        this.isOver = true;
         this.bird.unscheduleUpdate();
         //抖动
-
+        this.runAction(cc.Shake.create(0.5,5));
         //
+        this.schedule(this.ShowOverBoard,0.2);
+
+        if(this.scole > this.bestScole){
+            this.bestScole = this.scole;
+        }
+
+
+    },
+    ShowOverBoard:function(){
+        this.removeChild(this.GameNode,false);
+        this.addChild(this.OverNode,10,0);
+
+        this.OverNode.getChildren()[1].initWithString(this.scole,res.numsmall,14,16,'0');
+        this.OverNode.getChildren()[2].initWithString(this.bestScole,res.numsmall,14,16,'0');
+    },
+    Replay:function(){
+        this.isOver = false;
+        this.bird.setPosition(cc.p(96,250));
+        this.removeChild(this.OverNode,false);
+        this.StartGame();
     }
 });
 
@@ -304,6 +356,7 @@ var mainScene = cc.Scene.extend({
 
         var layer = new main();
         layer.init();
+        layer.setPosition(cc.p(0,0));
         this.addChild(layer,layer.getTag());
     }
 });

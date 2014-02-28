@@ -2,10 +2,9 @@
  * Created by liyupeng on 14-2-26.
  */
 var speedyjump = 30;
-var speedyFace = 10;
+var speedyFace = -200;
 var speedyFaceAngle = -20;
-var speedyFaceDownStart = 0;
-var speedyFaceDown = -200;
+var speedyFaceDown = -400;
 var speedyFaceDownAngle = 90;
 
 var bird = cc.Sprite.extend({
@@ -37,7 +36,7 @@ var bird = cc.Sprite.extend({
         animFrames.push(frame2);
         animFrames.push(frame3);
 
-        this.boxRect = cc.rect(0,0,34,24);
+        this.boxRect = cc.rect(0,0,24,24);
 
         var animation = cc.Animation.create(animFrames, 0.1);
         var animate = cc.Animate.create(animation);
@@ -58,30 +57,24 @@ var bird = cc.Sprite.extend({
     },
     died : function(){
         this.isdied = true;
+        this.PlayFly(false);
     },
     PlayFly:function(flag){
         if(flag === true)
             this.runAction(animateFly);
         else
-            this.removeAction(animateFly);
+            this.stopAction(animateFly);
     },
     RotationFly:function(){
         var rot = 0;
         if(this.speedy > speedyFace)
         {
             rot = speedyFaceAngle;
-        }
-        else if(this.speedy > 0)
-        {
-            rot = this.speedy / speedyFace * speedyFaceAngle;
-        }
-        else if(this.speedy > speedyFaceDownStart)
-        {
-            rot = 0;
+            rot = speedyFaceAngle;
         }
         else if(this.speedy > speedyFaceDown)
         {
-            rot = (this.speedy - speedyFaceDownStart) / (speedyFaceDown - speedyFaceDownStart) * speedyFaceDownAngle;
+            rot = (this.speedy - speedyFace) / (speedyFaceDown - speedyFace) * (speedyFaceDownAngle - speedyFaceAngle);
         }
         else
         {
@@ -114,6 +107,7 @@ var bird = cc.Sprite.extend({
         {
             main.Died();
         }
+//        console.log(this.getPosition().x);
     }
 })
 

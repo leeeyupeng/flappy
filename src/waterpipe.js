@@ -24,10 +24,10 @@ var waterpipe = cc.Layer.extend({
         this.boxRect = new Array();
 
         this.boxRect.push(cc.rect(0,this.center.y + waterpipeinterval * 0.5
-            ,52,winSize.height - (this.center.y + waterpipeinterval * 0.5)));
+            ,48,winSize.height - (this.center.y + waterpipeinterval * 0.5)));
 
         this.boxRect.push(cc.rect(0,0
-            ,52,this.center.y - waterpipeinterval * 0.5));
+            ,48,this.center.y - waterpipeinterval * 0.5));
 
         var sp = new cc.Sprite();
         sp.initWithSpriteFrameName("pipe-down.png");
